@@ -89,9 +89,16 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash_val = self.hash_index(key)
+        index = self.hash_index(key)
+        hte = HashTableEntry(key, value)
+        node = self.storage[index]
 
-        self.storage[hash_val] = value
+        if node is not None:
+            self.storage[index] = hte
+            self.storage[index].next = node
+        else:
+            self.storage[index] = hte
+        self.elements += 1
 
     def delete(self, key):
         """
@@ -102,9 +109,24 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash_value = self.hash_index(key)
+        index = self.hash_index(key)
+        node = self.storage[index]
+        prev = None
 
-        self.storage[hash_value] = None
+        if node.key == key:
+            self.storage[index] = node.next
+            return
+
+        while node != None:
+            if node.key == key:
+                prev.next = node.next
+                self.storage[index].next = None
+                return
+
+            prev = node
+            node = node.next
+        self.elements -= 1
+        return
 
     def get(self, key):
         """
@@ -115,9 +137,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash_value = self.hash_index(key)
+        index = self.hash_index(key)
+        node = self.storage[index]
 
-        return self.storage[hash_value]
+        if node is not None:
+            while node:
+                if node.key == key:
+                    return node.value
+                node = node.next
+        return node
 
     def resize(self, new_capacity):
         """
@@ -127,7 +155,26 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        # Step 1: make a new, bigger table/array
+        # ....Update capacity on new capacity
+        # ....Update storage with new capacity
+        prev_stor = self.storage
+        self.capacity = new_capacity
+        self.storage = [None] * new_capacity
+        # Step 2: go through all the old elements, and hash into the new list
+        # Look through each key value pair in previous storage
+        for i in range(len(prev_stor)):
+            # Check previous storage with i as index
+            old = prev_stor[i]
+            # Check to see if that hash index exists:
+            if old:
+                # Look through this hash index list
+                while old:
+                    if old.key:
+                        # If found, rehash to new storage
+                        self.put(old.key, old.value)
+                        # Continue looking through list until None
+                        old = old.next
 
 
 if __name__ == "__main__":
